@@ -6,6 +6,10 @@
     border-left: 4px solid;
 }
 
+.cum-notice p {
+    margin: 0;
+}
+
 .cum-notice.notice-success {
     background-color: #f0f9eb;
     border-color: #67c23a;
