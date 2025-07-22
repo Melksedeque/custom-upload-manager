@@ -2,7 +2,7 @@
 /*
 Plugin Name: Custom Upload Manager
 Description: Plugin para gerenciamento de uploads de arquivos por usuários
-Version: 1.1
+Version: 1.2
 Author: Melksedeque Silva
 Author email: freelancer@melksedeque.com.br
 Author site: https://github.com/Melksedeque/
@@ -44,6 +44,9 @@ class Custom_Upload_Manager {
         add_action('init', array($this->upload_handler, 'handle_file_upload'));
         add_action('init', array($this->file_list, 'handle_file_delete'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
+
+        // Redirecionar no logout
+        add_action('wp_logout', array($this, 'redirect_after_logout'));
         
         // Cria o diretório de uploads se não existir
         $this->create_upload_directory();
@@ -64,7 +67,7 @@ class Custom_Upload_Manager {
             array(),
             '1.1'
         );
-        
+
         wp_enqueue_style('dashicons');
 
         wp_enqueue_script(
@@ -74,6 +77,12 @@ class Custom_Upload_Manager {
             '1.1',
             true
         );
+    }
+
+    // Método de redirecionamento no logout
+    public function redirect_after_logout() {
+        wp_redirect(home_url());
+        exit();
     }
 }
 
