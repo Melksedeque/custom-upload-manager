@@ -160,7 +160,7 @@ class CUM_File_List {
             }
         }
         
-        wp_redirect(add_query_arg('upload_error', 'generic', wp_get_referer()));
+        wp_redirect(add_query_arg('upload_error', 'error', wp_get_referer()));
         exit;
     }
 }
