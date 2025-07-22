@@ -7,6 +7,8 @@ class CUM_Notifications {
             'error' => 'notice-error',
             'info' => 'notice-info'
         );
+
+        $this->remove_existing_notices();
         
         return sprintf(
             '<div class="cum-notice %s" data-auto-dismiss="5000">
@@ -18,6 +20,10 @@ class CUM_Notifications {
             $classes[$type] ?? 'notice-info',
             $message
         );
+    }
+
+    private function remove_existing_notices() {
+        echo '<script>jQuery(".cum-notice").remove();</script>';
     }
     
     public function get_login_message() {
@@ -33,10 +39,23 @@ class CUM_Notifications {
     }
     
     public function handle_query_notices() {
-        if (isset($_GET['upload']) && $_GET['upload'] === 'success') {
-            echo $this->show_notice('success', 'Arquivo(s) enviado(s) com sucesso!');
+        // Verifica se há uma mensagem de exclusão (tem prioridade)
+        if (isset($_GET['delete']) && $_GET['delete'] === 'success') {
+            add_action('wp_footer', function() {
+                echo $this->show_notice('success', 'Arquivo excluído com sucesso!', 'delete-success');
+            });
+            return;
         }
         
+        // Verifica se há mensagem de upload
+        if (isset($_GET['upload']) && $_GET['upload'] === 'success') {
+            add_action('wp_footer', function() {
+                echo $this->show_notice('success', 'Arquivo(s) enviado(s) com sucesso!', 'upload-success');
+            });
+            return;
+        }
+        
+        // Verifica se há erro de upload
         if (isset($_GET['upload_error'])) {
             $error_messages = array(
                 'type' => 'Tipo de arquivo não permitido.',
@@ -46,13 +65,7 @@ class CUM_Notifications {
             
             $message = $error_messages[$_GET['upload_error']] ?? $error_messages['generic'];
             add_action('wp_footer', function() use ($message) {
-                echo $this->show_notice('error', $message);
-            });
-        }
-        
-        if (isset($_GET['delete']) && $_GET['delete'] === 'success') {
-            add_action('wp_footer', function() {
-                echo $this->show_notice('success', 'Arquivo excluído com sucesso!');
+                echo $this->show_notice('error', $message, 'upload-error');
             });
         }
     }
