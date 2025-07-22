@@ -9,7 +9,12 @@ class CUM_Notifications {
         );
         
         return sprintf(
-            '<div class="cum-notice %s"><p>%s</p></div>',
+            '<div class="cum-notice %s" data-auto-dismiss="5000">
+                <p>%s</p>
+                <button type="button" class="cum-notice-dismiss" aria-label="Fechar">
+                    <span class="dashicons dashicons-no-alt"></span>
+                </button>
+            </div>',
             $classes[$type] ?? 'notice-info',
             $message
         );
