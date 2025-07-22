@@ -45,11 +45,15 @@ class CUM_Notifications {
             );
             
             $message = $error_messages[$_GET['upload_error']] ?? $error_messages['generic'];
-            echo $this->show_notice('error', $message);
+            add_action('wp_footer', function() use ($message) {
+                echo $this->show_notice('error', $message);
+            });
         }
         
         if (isset($_GET['delete']) && $_GET['delete'] === 'success') {
-            echo $this->show_notice('success', 'Arquivo excluído com sucesso!');
+            add_action('wp_footer', function() {
+                echo $this->show_notice('success', 'Arquivo excluído com sucesso!');
+            });
         }
     }
 }
