@@ -29,7 +29,7 @@ class CUM_Notifications {
     
     public function get_login_message() {
         return '<div class="cum-alert">
-            <p>Você está tentando acessar uma Área Restrita. Por favor, faça <a href="' . esc_url(wp_login_url()) . '">login</a> para acessar esta área.</p>
+            <p>Você está tentando acessar uma Área Restrita. Por favor, faça <a href="https://centrorochas.org.br/area-do-associado/">login</a> para acessar esta área.</p>
         </div>';
     }
     
