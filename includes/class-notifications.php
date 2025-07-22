@@ -11,13 +11,14 @@ class CUM_Notifications {
         $this->remove_existing_notices();
         
         return sprintf(
-            '<div class="cum-notice %s" data-auto-dismiss="5000">
+            '<div class="cum-notice %s" data-auto-dismiss="5000" data-notice-id="%s">
                 <p>%s</p>
                 <button type="button" class="cum-notice-dismiss" aria-label="Fechar">
                     <span class="dashicons dashicons-no-alt"></span>
                 </button>
             </div>',
             $classes[$type] ?? 'notice-info',
+            esc_attr($unique_id),
             $message
         );
     }
@@ -39,26 +40,24 @@ class CUM_Notifications {
     }
     
     public function handle_query_notices() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-        // Verifica se há uma mensagem de exclusão (tem prioridade)
-        if (isset($_GET['delete']) && $_GET['delete'] === 'success') {
-            add_action('wp_footer', function() {
-                echo $this->show_notice('success', 'Arquivo excluído com sucesso!', 'delete-success');
-            });
+        if (isset($_GET['delete'])) {
+            if ($_GET['delete'] === 'success') {
+                add_action('wp_footer', function() {
+                    echo $this->show_notice('success', 'Arquivo excluído com sucesso!', 'delete-success');
+                });
+            }
             return;
         }
         
-        // Verifica se há mensagem de upload
-        if (isset($_GET['upload']) && $_GET['upload'] === 'success') {
-            add_action('wp_footer', function() {
-                echo $this->show_notice('success', 'Arquivo(s) enviado(s) com sucesso!', 'upload-success');
-            });
+        if (isset($_GET['upload'])) {
+            if ($_GET['upload'] === 'success') {
+                add_action('wp_footer', function() {
+                    echo $this->show_notice('success', 'Arquivo(s) enviado(s) com sucesso!', 'upload-success');
+                });
+            }
             return;
         }
         
-        // Verifica se há erro de upload
         if (isset($_GET['upload_error'])) {
             $error_messages = array(
                 'type' => 'Tipo de arquivo não permitido.',
