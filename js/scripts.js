@@ -1,10 +1,10 @@
 jQuery(document).ready(function($) {
+    // Remove notificações existentes ao carregar a página
+    $('.cum-notice').remove();
+
     // Fechar notificação manualmente
     $(document).on('click', '.cum-notice-dismiss', function() {
-        $(this).closest('.cum-notice').addClass('fade-out');
-        setTimeout(() => {
-            $(this).closest('.cum-notice').remove();
-        }, 500);
+        dismissNotice($(this).closest('.cum-notice'));
     });
 
     // Fechar notificação automaticamente
@@ -14,12 +14,16 @@ jQuery(document).ready(function($) {
         
         setTimeout(() => {
             if (notice.is(':visible')) {
-                notice.addClass('fade-out');
-                setTimeout(() => notice.remove(), 500);
+                dismissNotice(notice);
             }
         }, timeout);
     });
-    
+
+    function dismissNotice(notice) {
+        notice.addClass('fade-out');
+        setTimeout(() => notice.remove(), 500);
+    }
+
     // Preview dos arquivos selecionados
     $('#cum_files').on('change', function() {
         const files = this.files;
