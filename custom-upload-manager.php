@@ -65,6 +65,8 @@ class Custom_Upload_Manager {
             '1.1'
         );
         
+        wp_enqueue_style('dashicons');
+
         wp_enqueue_script(
             'custom-upload-manager',
             CUM_PLUGIN_URL . 'js/scripts.js',
