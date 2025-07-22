@@ -5,7 +5,7 @@ Description: Plugin para gerenciamento de uploads de arquivos por usuários
 Version: 1.2
 Author: Melksedeque Silva
 Author email: freelancer@melksedeque.com.br
-Author site: https://github.com/Melksedeque/
+Author URI: https://github.com/Melksedeque/
 */
 
 if (!defined('ABSPATH')) {
