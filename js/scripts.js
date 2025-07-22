@@ -1,4 +1,15 @@
 jQuery(document).ready(function($) {
+    // Remove parâmetros da URL após mostrar as notificações
+    if (window.location.search.includes('upload=') || 
+        window.location.search.includes('delete=') || 
+        window.location.search.includes('upload_error=')) {
+        
+        // Espera a animação terminar antes de limpar a URL
+        setTimeout(() => {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 1000);
+    }
+
     // Remove notificações existentes ao carregar a página
     $('.cum-notice').remove();
 
