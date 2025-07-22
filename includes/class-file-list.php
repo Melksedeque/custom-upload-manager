@@ -155,12 +155,14 @@ class CUM_File_List {
         
         if (file_exists($file_path)) {
             if (unlink($file_path)) {
-                wp_redirect(add_query_arg('delete', 'success', wp_get_referer()));
+                // Limpa qualquer parâmetro de upload existente na URL
+                $redirect_url = remove_query_arg(['upload', 'upload_error'], wp_get_referer());
+                wp_redirect(add_query_arg('delete', 'success', $redirect_url));
                 exit;
             }
         }
         
-        wp_redirect(add_query_arg('upload_error', 'error', wp_get_referer()));
+        wp_redirect(add_query_arg('upload_error', 'generic', wp_get_referer()));
         exit;
     }
 }
