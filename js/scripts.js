@@ -1,4 +1,25 @@
 jQuery(document).ready(function($) {
+    // Fechar notificação manualmente
+    $(document).on('click', '.cum-notice-dismiss', function() {
+        $(this).closest('.cum-notice').addClass('fade-out');
+        setTimeout(() => {
+            $(this).closest('.cum-notice').remove();
+        }, 500);
+    });
+
+    // Fechar notificação automaticamente
+    $('.cum-notice[data-auto-dismiss]').each(function() {
+        const notice = $(this);
+        const timeout = parseInt(notice.attr('data-auto-dismiss'));
+        
+        setTimeout(() => {
+            if (notice.is(':visible')) {
+                notice.addClass('fade-out');
+                setTimeout(() => notice.remove(), 500);
+            }
+        }, timeout);
+    });
+    
     // Preview dos arquivos selecionados
     $('#cum_files').on('change', function() {
         const files = this.files;
