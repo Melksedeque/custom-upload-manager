@@ -101,10 +101,12 @@ class CUM_Upload_Handler {
         // Redireciona com feedback
         if (!empty($upload_errors)) {
             $error_type = (strpos($upload_errors[0], 'Erro no upload') !== false) ? 'generic' : 
-                         ($_FILES['cum_files']['size'][0] > 5 * 1024 * 1024 ? 'size' : 'type');
-            wp_redirect(add_query_arg('upload_error', $error_type, '/area-do-assinante/meus-documentos/'));
+                        ($_FILES['cum_files']['size'][0] > 5 * 1024 * 1024 ? 'size' : 'type');
+            $redirect_url = remove_query_arg(['upload', 'delete'], '/area-do-assinante/meus-documentos/');
+            wp_redirect(add_query_arg('upload_error', $error_type, $redirect_url));
         } else {
-            wp_redirect(add_query_arg('upload', 'success', '/area-do-assinante/meus-documentos/'));
+            $redirect_url = remove_query_arg(['upload_error', 'delete'], '/area-do-assinante/meus-documentos/');
+            wp_redirect(add_query_arg('upload', 'success', $redirect_url));
         }
         exit;
     }
