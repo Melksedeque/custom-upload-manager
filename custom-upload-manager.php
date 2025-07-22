@@ -238,5 +238,4 @@ class Custom_Upload_Manager {
     }
 }
 
-// Inicializa a classe principal
 new Custom_Upload_Manager();
