@@ -1,0 +1,46 @@
+.custom-upload-form {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.custom-upload-form .form-group {
+    margin-bottom: 15px;
+}
+
+.custom-upload-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.custom-upload-form input[type="file"] {
+    width: 100%;
+}
+
+.custom-file-list table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.custom-file-list th {
+    text-align: left;
+    background: #f1f1f1;
+    padding: 10px;
+}
+
+.custom-file-list td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.custom-file-list .button-link {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
