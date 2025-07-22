@@ -39,6 +39,9 @@ class CUM_Notifications {
     }
     
     public function handle_query_notices() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         // Verifica se há uma mensagem de exclusão (tem prioridade)
         if (isset($_GET['delete']) && $_GET['delete'] === 'success') {
             add_action('wp_footer', function() {
