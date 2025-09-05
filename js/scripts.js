@@ -4,7 +4,8 @@ jQuery(document).ready(function($) {
         window.location.search.includes('delete=') || 
         window.location.search.includes('upload_error=') ||
         window.location.search.includes('folder_created=') ||
-        window.location.search.includes('folder_error=')) {
+        window.location.search.includes('folder_error=') ||
+        window.location.search.includes('cache_bust=')) {
         
         // Espera a animação terminar antes de limpar a URL
         setTimeout(() => {
@@ -116,11 +117,48 @@ jQuery(document).ready(function($) {
     
     // Atualiza a lista de pastas no select após criação bem-sucedida
     if (window.location.search.includes('folder_created=success')) {
-        // Recarrega a página para atualizar a lista de pastas
+        console.log('🎯 Pasta criada com sucesso detectada, iniciando atualização...');
+        
+        // Força limpeza de cache e recarregamento
         setTimeout(() => {
-            window.location.reload();
-        }, 1500);
+            console.log('🔄 Forçando reload com limpeza de cache...');
+            
+            // Adiciona timestamp para forçar bypass do cache
+            const currentUrl = window.location.href.split('?')[0];
+            const timestamp = Date.now();
+            const newUrl = currentUrl + '?cache_bust=' + timestamp;
+            
+            console.log('📍 URL original:', window.location.href);
+            console.log('📍 Nova URL:', newUrl);
+            
+            // Força reload com nova URL para bypass do cache
+            window.location.href = newUrl;
+        }, 1000);
     }
+    
+    // Debug: Log das pastas carregadas no dropdown
+    $(document).ready(function() {
+        const folderOptions = $('#cum_folder_select option');
+        console.log('📁 Pastas carregadas no dropdown:', folderOptions.length - 1); // -1 para excluir "pasta raiz"
+        
+        folderOptions.each(function(index) {
+            if (index > 0) { // Pula a primeira opção (pasta raiz)
+                console.log('  📂', $(this).val(), '-', $(this).text());
+            }
+        });
+        
+        // Verifica se há parâmetros de cache bust na URL
+        if (window.location.search.includes('cache_bust=')) {
+            console.log('✅ Cache bust detectado na URL, limpando parâmetros...');
+            
+            // Remove o parâmetro cache_bust após o carregamento
+            setTimeout(() => {
+                const cleanUrl = window.location.href.split('?')[0];
+                window.history.replaceState({}, document.title, cleanUrl);
+                console.log('🧹 URL limpa:', cleanUrl);
+            }, 2000);
+        }
+    });
     
     // Placeholder dinâmico para o campo de nome da pasta
     const folderPlaceholders = [
