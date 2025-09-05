@@ -101,7 +101,7 @@ class CUM_Upload_Handler {
         }
         
         $upload_errors = array();
-        $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx');
+        $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'pdf', 'doc', 'docx', 'xls', 'xlsx');
         
         foreach ($_FILES['cum_files']['name'] as $index => $name) {
             if ($_FILES['cum_files']['error'][$index] !== UPLOAD_ERR_OK) {
