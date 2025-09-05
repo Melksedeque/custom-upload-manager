@@ -2,9 +2,11 @@
 class CUM_File_List {
     
     private $notifications;
+    private $folder_manager;
     
-    public function __construct($notifications) {
+    public function __construct($notifications, $folder_manager) {
         $this->notifications = $notifications;
+        $this->folder_manager = $folder_manager;
     }
     
     public function file_list_shortcode() {
@@ -16,18 +18,38 @@ class CUM_File_List {
         
         $current_user = wp_get_current_user();
         $username = sanitize_file_name($current_user->user_login);
-        $user_dir = CUM_UPLOAD_DIR . $username . '/';
+        
+        // Verifica se está navegando em uma pasta específica
+        $current_folder = isset($_GET['folder']) ? sanitize_text_field($_GET['folder']) : '';
+        
+        if (!empty($current_folder) && !$this->folder_manager->folder_exists($current_folder)) {
+            $current_folder = '';
+        }
+        
+        $user_dir = $this->folder_manager->get_folder_path($current_folder);
         
         // Verifica se o diretório existe
-        if (!file_exists($user_dir)) {
+        if (!$user_dir || !file_exists($user_dir)) {
             return $this->notifications->get_no_files_message();
         }
         
-        // Obtém a lista de arquivos
-        $files = scandir($user_dir);
-        $files = array_diff($files, array('.', '..'));
+        // Obtém pastas e arquivos
+        $items = scandir($user_dir);
+        $items = array_diff($items, array('.', '..'));
         
-        if (empty($files)) {
+        $folders = array();
+        $files = array();
+        
+        foreach ($items as $item) {
+            $item_path = $user_dir . $item;
+            if (is_dir($item_path)) {
+                $folders[] = $item;
+            } else {
+                $files[] = $item;
+            }
+        }
+        
+        if (empty($folders) && empty($files)) {
             return $this->notifications->get_no_files_message();
         }
         
@@ -47,6 +69,18 @@ class CUM_File_List {
         ob_start();
         ?>
         <div class="custom-file-list">
+            <!-- Navegação de pastas -->
+            <div class="cum-folder-navigation">
+                <?php if (!empty($current_folder)): ?>
+                    <a href="<?php echo remove_query_arg('folder'); ?>" class="cum-back-button">
+                        <span class="dashicons dashicons-arrow-left-alt2"></span> Voltar para pasta raiz
+                    </a>
+                    <h3>Pasta: <?php echo esc_html($current_folder); ?></h3>
+                <?php else: ?>
+                    <h3>Meus Arquivos</h3>
+                <?php endif; ?>
+            </div>
+            
             <div class="cum-sorting-options">
                 <span>Ordenar por:</span>
                 <a href="<?php echo add_query_arg(array('orderby' => 'name', 'order' => $orderby === 'name' && $order === 'asc' ? 'desc' : 'asc')); ?>" class="<?php echo $orderby === 'name' ? 'active' : ''; ?>">
@@ -60,28 +94,58 @@ class CUM_File_List {
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
-                        <th>Arquivo</th>
+                        <th>Nome</th>
                         <th>Tipo</th>
-                        <th>Enviado em</th>
+                        <th>Data</th>
                         <th>Opções</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($files as $file): 
+                    <?php 
+                    // Exibe pastas primeiro (apenas se estivermos na pasta raiz)
+                    if (empty($current_folder)):
+                        foreach ($folders as $folder): 
+                            $folder_path = $user_dir . $folder;
+                            $folder_date = date('d/m/Y H:i', filemtime($folder_path));
+                            $folder_url = add_query_arg('folder', $folder);
+                    ?>
+                    <tr class="cum-folder-row">
+                        <td>
+                            <span class="dashicons dashicons-category"></span>
+                            <a href="<?php echo esc_url($folder_url); ?>"><?php echo esc_html($folder); ?></a>
+                        </td>
+                        <td>Pasta</td>
+                        <td><?php echo esc_html($folder_date); ?></td>
+                        <td>
+                            <a href="<?php echo esc_url($folder_url); ?>" class="button-link" title="Abrir pasta">
+                                <span class="dashicons dashicons-external"></span>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php 
+                        endforeach;
+                    endif;
+                    
+                    // Exibe arquivos
+                    foreach ($files as $file): 
                         $file_path = $user_dir . $file;
-                        $file_url = CUM_UPLOAD_URL . $username . '/' . rawurlencode($file);
+                        $file_url = $this->folder_manager->get_folder_url($current_folder) . rawurlencode($file);
                         $file_ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                         $file_date = date('d/m/Y H:i', filemtime($file_path));
                     ?>
-                    <tr>
-                        <td><a href="<?php echo esc_url($file_url); ?>" target="_blank"><?php echo esc_html($file); ?></a></td>
+                    <tr class="cum-file-row">
+                        <td>
+                            <span class="dashicons dashicons-media-default"></span>
+                            <a href="<?php echo esc_url($file_url); ?>" target="_blank"><?php echo esc_html($file); ?></a>
+                        </td>
                         <td><?php echo esc_html(strtoupper($file_ext)); ?></td>
                         <td><?php echo esc_html($file_date); ?></td>
                         <td>
-                            <form method="post" class="cum-delete-form">
+                            <form method="post" class="cum-delete-form" style="display: inline;">
                                 <input type="hidden" name="cum_action" value="delete_file">
                                 <input type="hidden" name="cum_file" value="<?php echo esc_attr($file); ?>">
-                                <button type="submit" class="button-link" onclick="return confirm('Tem certeza que deseja excluir este arquivo?')">
+                                <input type="hidden" name="cum_folder" value="<?php echo esc_attr($current_folder); ?>">
+                                <button type="submit" class="button-link" onclick="return confirm('Tem certeza que deseja excluir este arquivo?')" title="Excluir arquivo">
                                     <span class="dashicons dashicons-trash"></span>
                                 </button>
                             </form>
@@ -148,15 +212,26 @@ class CUM_File_List {
         
         $current_user = wp_get_current_user();
         $username = sanitize_file_name($current_user->user_login);
-        $user_dir = CUM_UPLOAD_DIR . $username . '/';
+        
+        // Verifica se o arquivo está em uma pasta específica
+        $current_folder = isset($_POST['cum_folder']) ? sanitize_text_field($_POST['cum_folder']) : '';
+        
+        if (!empty($current_folder) && $this->folder_manager->folder_exists($current_folder)) {
+            $user_dir = $this->folder_manager->get_folder_path($current_folder);
+        } else {
+            $user_dir = $this->folder_manager->get_folder_path();
+        }
         
         $file_name = sanitize_file_name($_POST['cum_file']);
         $file_path = $user_dir . $file_name;
         
         if (file_exists($file_path)) {
             if (unlink($file_path)) {
-                // Limpa qualquer parâmetro de upload existente na URL
+                // Limpa qualquer parâmetro de upload existente na URL e mantém a pasta atual
                 $redirect_url = remove_query_arg(['upload', 'upload_error'], wp_get_referer());
+                if (!empty($current_folder)) {
+                    $redirect_url = add_query_arg('folder', $current_folder, $redirect_url);
+                }
                 wp_redirect(add_query_arg('delete', 'success', $redirect_url));
                 exit;
             }
