@@ -34,7 +34,15 @@ class CUM_Notifications {
     }
     
     public function get_no_files_message() {
-        return '<div class="cum-alert">
+        return '<div style="display: flex; align-items: center; justify-content: space-between;">
+        <a href="/area-do-associado/meus-documentos/" class="button cum-new-file-button">
+                <span class="dashicons dashicons-list-view"></span> Meus Arquivos
+            </a>
+            <a href="/area-do-associado/formulario-de-envio/" class="button cum-new-file-button">
+                <span class="dashicons dashicons-plus-alt2"></span> Novo Arquivo
+            </a>
+        </div>
+        <div class="cum-alert">
             <p>Você ainda não enviou nenhum arquivo.</p>
         </div>';
     }
