@@ -81,13 +81,18 @@ class CUM_File_List {
                 <?php endif; ?>
             </div>
             
-            <div class="cum-sorting-options">
-                <span>Ordenar por:</span>
-                <a href="<?php echo add_query_arg(array('orderby' => 'name', 'order' => $orderby === 'name' && $order === 'asc' ? 'desc' : 'asc')); ?>" class="<?php echo $orderby === 'name' ? 'active' : ''; ?>">
-                    Nome <?php echo $orderby === 'name' ? ($order === 'asc' ? '↑' : '↓') : ''; ?>
-                </a>
-                <a href="<?php echo add_query_arg(array('orderby' => 'date', 'order' => $orderby === 'date' && $order === 'asc' ? 'desc' : 'asc')); ?>" class="<?php echo $orderby === 'date' ? 'active' : ''; ?>">
-                    Data <?php echo $orderby === 'date' ? ($order === 'asc' ? '↑' : '↓') : ''; ?>
+            <div class="cum-sorting-new-file" style="display: flex; align-items: center; justify-content: space-between">
+                <div class="cum-sorting-options">
+                    <span>Ordenar por:</span>
+                    <a href="<?php echo add_query_arg(array('orderby' => 'name', 'order' => $orderby === 'name' && $order === 'asc' ? 'desc' : 'asc')); ?>" class="<?php echo $orderby === 'name' ? 'active' : ''; ?>">
+                        Nome <?php echo $orderby === 'name' ? ($order === 'asc' ? '↑' : '↓') : ''; ?>
+                    </a>
+                    <a href="<?php echo add_query_arg(array('orderby' => 'date', 'order' => $orderby === 'date' && $order === 'asc' ? 'desc' : 'asc')); ?>" class="<?php echo $orderby === 'date' ? 'active' : ''; ?>">
+                        Data <?php echo $orderby === 'date' ? ($order === 'asc' ? '↑' : '↓') : ''; ?>
+                    </a>
+                </div>
+                <a href="/area-do-associado/formulario-de-envio/" class="button cum-new-file-button">
+                    <span class="dashicons dashicons-plus-alt2"></span> Novo Arquivo
                 </a>
             </div>
             
