@@ -50,7 +50,7 @@ class CUM_File_List {
         }
         
         if (empty($folders) && empty($files)) {
-            return $this->notifications->get_no_files_message();
+            return $this->notifications->get_no_files_message($current_folder);
         }
         
         // Processa ordenação
