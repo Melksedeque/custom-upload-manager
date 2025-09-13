@@ -2,7 +2,7 @@
 /*
 Plugin Name: Custom Upload Manager
 Description: Plugin para gerenciamento de uploads de arquivos por usuários
-Version: 1.2
+Version: 1.3
 Author: Melksedeque Silva
 Author email: freelancer@melksedeque.com.br
 Author URI: https://github.com/Melksedeque/
