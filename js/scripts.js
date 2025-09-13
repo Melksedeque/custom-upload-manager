@@ -2,7 +2,10 @@ jQuery(document).ready(function($) {
     // Remove parâmetros da URL após mostrar as notificações
     if (window.location.search.includes('upload=') || 
         window.location.search.includes('delete=') || 
-        window.location.search.includes('upload_error=')) {
+        window.location.search.includes('upload_error=') ||
+        window.location.search.includes('folder_created=') ||
+        window.location.search.includes('folder_error=') ||
+        window.location.search.includes('cache_bust=')) {
         
         // Espera a animação terminar antes de limpar a URL
         setTimeout(() => {
@@ -64,5 +67,134 @@ jQuery(document).ready(function($) {
             return confirm('Você está tentando enviar muitos arquivos de uma vez. Deseja continuar?');
         }
         return true;
+    });
+    
+    // Gerenciamento de pastas
+    
+    // Validação do nome da pasta
+    $('#cum_folder_name').on('input', function() {
+        const folderName = $(this).val();
+        const button = $(this).siblings('button');
+        
+        // Remove caracteres não permitidos em tempo real
+        const sanitized = folderName.replace(/[^a-zA-Z0-9\-_\s]/g, '');
+        if (sanitized !== folderName) {
+            $(this).val(sanitized);
+        }
+        
+        // Habilita/desabilita o botão baseado na validação
+        if (sanitized.trim().length > 0 && sanitized.trim().length <= 50) {
+            button.prop('disabled', false);
+        } else {
+            button.prop('disabled', true);
+        }
+    });
+    
+    // Submissão do formulário de criação de pasta
+    $('#cum-folder-form').on('submit', function(e) {
+        const folderName = $('#cum_folder_name').val().trim();
+        
+        if (folderName.length === 0) {
+            e.preventDefault();
+            alert('Por favor, digite um nome para a pasta.');
+            return false;
+        }
+        
+        if (folderName.length > 50) {
+            e.preventDefault();
+            alert('O nome da pasta deve ter no máximo 50 caracteres.');
+            return false;
+        }
+        
+        // Confirma a criação da pasta
+        if (!confirm(`Deseja criar a pasta "${folderName}"?`)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        return true;
+    });
+    
+    // Atualiza a lista de pastas no select após criação bem-sucedida
+    if (window.location.search.includes('folder_created=success')) {
+        console.log('🎯 Pasta criada com sucesso detectada, iniciando atualização...');
+        
+        // Força limpeza de cache e recarregamento
+        setTimeout(() => {
+            console.log('🔄 Forçando reload com limpeza de cache...');
+            
+            // Adiciona timestamp para forçar bypass do cache
+            const currentUrl = window.location.href.split('?')[0];
+            const timestamp = Date.now();
+            const newUrl = currentUrl + '?cache_bust=' + timestamp;
+            
+            console.log('📍 URL original:', window.location.href);
+            console.log('📍 Nova URL:', newUrl);
+            
+            // Força reload com nova URL para bypass do cache
+            window.location.href = newUrl;
+        }, 1000);
+    }
+    
+    // Debug: Log das pastas carregadas no dropdown
+    $(document).ready(function() {
+        const folderOptions = $('#cum_folder_select option');
+        console.log('📁 Pastas carregadas no dropdown:', folderOptions.length - 1); // -1 para excluir "pasta raiz"
+        
+        folderOptions.each(function(index) {
+            if (index > 0) { // Pula a primeira opção (pasta raiz)
+                console.log('  📂', $(this).val(), '-', $(this).text());
+            }
+        });
+        
+        // Verifica se há parâmetros de cache bust na URL
+        if (window.location.search.includes('cache_bust=')) {
+            console.log('✅ Cache bust detectado na URL, limpando parâmetros...');
+            
+            // Remove o parâmetro cache_bust após o carregamento
+            setTimeout(() => {
+                const cleanUrl = window.location.href.split('?')[0];
+                window.history.replaceState({}, document.title, cleanUrl);
+                console.log('🧹 URL limpa:', cleanUrl);
+            }, 2000);
+        }
+    });
+    
+    // Placeholder dinâmico para o campo de nome da pasta
+    const folderPlaceholders = [
+        'Ex: NF, Contratos, Documentos',
+        'Ex: Relatórios, Planilhas',
+        'Ex: Fotos, Imagens',
+        'Ex: Backup, Arquivos'
+    ];
+    
+    let placeholderIndex = 0;
+    setInterval(() => {
+        const input = $('#cum_folder_name');
+        if (input.length && !input.is(':focus') && input.val() === '') {
+            input.attr('placeholder', folderPlaceholders[placeholderIndex]);
+            placeholderIndex = (placeholderIndex + 1) % folderPlaceholders.length;
+        }
+    }, 3000);
+    
+    // Destaque visual para a pasta selecionada no upload
+    $('#cum_folder_select').on('change', function() {
+        const selectedFolder = $(this).val();
+        const formGroup = $(this).closest('.form-group');
+        
+        if (selectedFolder) {
+            formGroup.addClass('folder-selected');
+        } else {
+            formGroup.removeClass('folder-selected');
+        }
+    });
+    
+    // Confirmação antes de navegar para uma pasta
+    $('.cum-folder-row a').on('click', function(e) {
+        const folderName = $(this).text();
+        if (!confirm(`Deseja abrir a pasta "${folderName}"?`)) {
+            e.preventDefault();
+            return false;
+        }
     });
 });
