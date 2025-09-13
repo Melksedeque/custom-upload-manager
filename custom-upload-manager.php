@@ -23,6 +23,7 @@ define('CUM_FILES_PER_PAGE', 20);
 require_once CUM_PLUGIN_PATH . 'includes/class-upload-handler.php';
 require_once CUM_PLUGIN_PATH . 'includes/class-file-list.php';
 require_once CUM_PLUGIN_PATH . 'includes/class-notifications.php';
+require_once CUM_PLUGIN_PATH . 'includes/class-folder-manager.php';
 
 // Inicializa o plugin
 class Custom_Upload_Manager {
@@ -30,11 +31,13 @@ class Custom_Upload_Manager {
     private $upload_handler;
     private $file_list;
     private $notifications;
+    private $folder_manager;
     
     public function __construct() {
         $this->notifications = new CUM_Notifications();
-        $this->upload_handler = new CUM_Upload_Handler($this->notifications);
-        $this->file_list = new CUM_File_List($this->notifications);
+        $this->folder_manager = new CUM_Folder_Manager($this->notifications);
+        $this->upload_handler = new CUM_Upload_Handler($this->notifications, $this->folder_manager);
+        $this->file_list = new CUM_File_List($this->notifications, $this->folder_manager);
         
         // Hooks e shortcodes
         add_shortcode('custom_upload_form', array($this->upload_handler, 'upload_form_shortcode'));
@@ -43,6 +46,7 @@ class Custom_Upload_Manager {
         // Actions
         add_action('init', array($this->upload_handler, 'handle_file_upload'));
         add_action('init', array($this->file_list, 'handle_file_delete'));
+        add_action('init', array($this->folder_manager, 'handle_folder_creation'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
 
         // Redirecionar no logout
