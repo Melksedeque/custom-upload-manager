@@ -2,9 +2,11 @@
 class CUM_Upload_Handler {
     
     private $notifications;
+    private $folder_manager;
     
-    public function __construct($notifications) {
+    public function __construct($notifications, $folder_manager) {
         $this->notifications = $notifications;
+        $this->folder_manager = $folder_manager;
     }
     
     public function upload_form_shortcode() {
@@ -20,9 +22,36 @@ class CUM_Upload_Handler {
         ob_start();
         ?>
         <div class="custom-upload-form">
+            <!-- Formulário para criar nova pasta -->
+            <div class="cum-folder-creation">
+                <h4>Criar Nova Pasta</h4>
+                <form method="post" id="cum-folder-form">
+                    <input type="hidden" name="cum_action" value="create_folder">
+                    <div class="form-group">
+                        <label for="cum_folder_name">Nome da pasta:</label>
+                        <input type="text" name="cum_folder_name" id="cum_folder_name" placeholder="Ex: NF, Contratos, Documentos" maxlength="50">
+                        <button type="submit" class="button button-secondary">Criar Pasta</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Formulário de upload -->
             <form method="post" enctype="multipart/form-data" id="cum-upload-form">
                 <input type="hidden" name="cum_action" value="upload_file">
                 <input type="hidden" name="cum_user" value="<?php echo esc_attr($username); ?>">
+                
+                <div class="form-group">
+                    <label for="cum_folder_select">Selecionar pasta:</label>
+                    <select name="cum_folder_select" id="cum_folder_select">
+                        <option value="">Pasta raiz (sem pasta)</option>
+                        <?php 
+                        $folders = $this->folder_manager->get_user_folders();
+                        foreach ($folders as $folder): 
+                        ?>
+                        <option value="<?php echo esc_attr($folder); ?>"><?php echo esc_html($folder); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
                 
                 <div class="form-group">
                     <label for="cum_files">Selecione os arquivos:</label>
@@ -50,9 +79,17 @@ class CUM_Upload_Handler {
         
         $current_user = wp_get_current_user();
         $username = sanitize_file_name($current_user->user_login);
-        $user_dir = CUM_UPLOAD_DIR . $username . '/';
         
-        // Cria o diretório do usuário se não existir
+        // Verifica se foi selecionada uma pasta específica
+        $selected_folder = isset($_POST['cum_folder_select']) ? sanitize_text_field($_POST['cum_folder_select']) : '';
+        
+        if (!empty($selected_folder) && $this->folder_manager->folder_exists($selected_folder)) {
+            $user_dir = $this->folder_manager->get_folder_path($selected_folder);
+        } else {
+            $user_dir = $this->folder_manager->get_folder_path();
+        }
+        
+        // Cria o diretório se não existir
         if (!file_exists($user_dir)) {
             wp_mkdir_p($user_dir);
         }
@@ -64,8 +101,7 @@ class CUM_Upload_Handler {
         }
         
         $upload_errors = array();
-        $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt');
-
+        $allowed_extensions = array('jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'pdf', 'doc', 'docx', 'xls', 'xlsx');
         
         foreach ($_FILES['cum_files']['name'] as $index => $name) {
             if ($_FILES['cum_files']['error'][$index] !== UPLOAD_ERR_OK) {
